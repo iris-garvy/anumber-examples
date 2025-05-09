@@ -128,19 +128,46 @@ rand_poly:=function(t,d,p) ;
     return poly;
 end function;
 
-for p in PrimesInInterval(3,23) do
-    K := GF(p);
-    R<t> := FunctionField(K);
-    for deg in [2*p-1 .. p^2-2 by p] do
+//Samples 100 random polynomials and returns percent with minimal a-number
+sample_minimal:=function(d,p);
+    count:=100;
+    K:=GF(p);
+    FF<t>:=FunctionField(K);
+    lowerbound:=lower_bound(d,p);
 
-        minimal_found := false;
-        while minimal_found eq false do
+    if (d mod p eq 0) then
+	    return "Invalid";
+    end if;
 
-            h:=rand_poly(t,deg,p);
-            minimal_found := anumber(h,deg,R) eq lower_bound(deg,p);
+    min_count:=0;
+    n :=0;
+    while (n lt count) do
+        n := n+1;
+        f := rand_poly(t,d,p);
+        if lowerbound eq anumber(f,d,FF) then
+            min_count:= min_count + 1;
+        end if;
+    end while;
 
-        end while;
-        fprintf "listofpolynomials.txt", "%3o \n", h;
-        printf "minimal found for p = %3o and d = %3o \n",p,deg;
+    return min_count;
+end function;
+
+//prints polynomials with d=np-1 and p<24 with minimal a-number to a text file
+print_examples := function();
+    for p in PrimesInInterval(3,23) do
+        K := GF(p);
+        R<t> := FunctionField(K);
+        for deg in [2*p-1 .. p^2-2 by p] do
+
+            minimal_found := false;
+            while minimal_found eq false do
+
+                h:=rand_poly(t,deg,p);
+                minimal_found := anumber(h,deg,R) eq lower_bound(deg,p);
+
+            end while;
+            fprintf "listofpolynomials.txt", "%3o \n", h;
+            printf "minimal found for p = %3o and d = %3o \n",p,deg;
+        end for;
     end for;
-end for;
+end function;
